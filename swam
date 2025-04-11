@@ -1,10 +1,25 @@
-import base64
+import zipfile
+import os
 
-# Path to the file you want to send
-with open("test_secret.txt", "rb") as f:
-    b64data = base64.b64encode(f.read()).decode()
+def run(args):
+    try:
+        zip_path = args['zip_path']
+        output_dir = args.get('output_dir', os.path.splitext(zip_path)[0] + "_unzipped")
 
-# Print the JSON string to send
-print("Enter this on SwarmOS when it asks for task args:")
-print()
-print(f'{{"filename": "received_test_secret.txt", "data": "{b64data}"}}')
+        # Resolve absolute path
+        zip_path = os.path.abspath(zip_path)
+        output_dir = os.path.abspath(output_dir)
+
+        if not os.path.exists(zip_path):
+            return f"[ERROR] Zip file '{zip_path}' not found."
+
+        os.makedirs(output_dir, exist_ok=True)
+
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(output_dir)
+
+        return f"[SUCCESS] Unzipped '{zip_path}' into '{output_dir}'"
+    except KeyError:
+        return "[ERROR] Missing required argument: 'zip_path'"
+    except Exception as e:
+        return f"[ERROR] Unzip error: {e}"
