@@ -1,26 +1,17 @@
-# tasks/encrypt_file.py
+# tasks/send_file.py
 
-from Crypto.Cipher import AES
-import os
+import base64
 
 def run(args):
     try:
-        filepath = args['filepath']
-        key = args['key']  # Must be 16, 24, or 32 bytes
+        filename = args['filename']
+        filedata_b64 = args['data']
 
-        if len(key) not in (16, 24, 32):
-            return "[ERROR] Key must be 16, 24, or 32 bytes long."
+        # Decode base64 and write the file
+        filedata = base64.b64decode(filedata_b64)
+        with open(filename, 'wb') as f:
+            f.write(filedata)
 
-        with open(filepath, 'rb') as f:
-            data = f.read()
-
-        cipher = AES.new(key.encode(), AES.MODE_EAX)
-        ciphertext, tag = cipher.encrypt_and_digest(data)
-
-        enc_file = filepath + ".enc"
-        with open(enc_file, 'wb') as f:
-            f.write(cipher.nonce + tag + ciphertext)
-
-        return f"[SUCCESS] File encrypted and saved as {enc_file}"
+        return f"[SUCCESS] File '{filename}' written on remote node."
     except Exception as e:
         return f"[ERROR] {str(e)}"
