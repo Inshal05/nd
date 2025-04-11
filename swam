@@ -1,17 +1,10 @@
-# tasks/send_file.py
-
 import base64
 
-def run(args):
-    try:
-        filename = args['filename']
-        filedata_b64 = args['data']
+# Path to the file you want to send
+with open("test_secret.txt", "rb") as f:
+    b64data = base64.b64encode(f.read()).decode()
 
-        # Decode base64 and write the file
-        filedata = base64.b64decode(filedata_b64)
-        with open(filename, 'wb') as f:
-            f.write(filedata)
-
-        return f"[SUCCESS] File '{filename}' written on remote node."
-    except Exception as e:
-        return f"[ERROR] {str(e)}"
+# Print the JSON string to send
+print("Enter this on SwarmOS when it asks for task args:")
+print()
+print(f'{{"filename": "received_test_secret.txt", "data": "{b64data}"}}')
